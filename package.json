@@ -20,7 +20,10 @@
         "type": "git",
         "url": "https://github.com/hoonsubin/glitch-deploy-tool.git"
     },
-    "main": "src/index.ts",
+    "module": "lib/index.js",
+    "bin": {
+        "glitch-deploy-tool": "lib/cli/index.js"
+    },
     "scripts": {
         "start": "NODE_ENV=production ts-node -r dotenv/config src/index.ts",
         "dev": "NODE_ENV=development ts-node-dev -r dotenv/config src/index.ts",

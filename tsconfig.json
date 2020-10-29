@@ -22,14 +22,14 @@
         "es2015"
     ],
     "include": [
-        "src/**/*"
+        "src/**/*", "scripts"
     ],
     "exclude": [
         "node_modules",
         "build",
         "lib",
         "dist",
-        "scripts",
-        "tests"
+        "tests",
+        "scripts"
     ]
 }
