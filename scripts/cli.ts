@@ -3,21 +3,23 @@ import path from 'path';
 import fs from 'fs-extra';
 import rimraf from 'rimraf';
 import * as Helpers from '../src/helpers';
+import { GlitchGit } from '../src/models';
 
+const REPO_SOURCE = process.env.REPO_SOURCE;
+// the folder to where it will copy things
+const TARGET_FOLDER = 'target';
+
+/**
+ * A script function used to test the deploy feature
+ */
 const pushToGlitch = async () => {
+    if (typeof REPO_SOURCE === 'undefined') {
+        throw new Error('target repository has not been provided');
+    }
     const ROOT_DIR = __dirname;
     // the folder name where the repo will be cloned
     // the name itself will not matter too much we only need its contents
     const REPO_FOLDER = '.__source-repo';
-
-    // the folder to where it will copy things
-    const TARGET_FOLDER = 'target';
-
-    const REPO_SOURCE = process.env.REPO_SOURCE;
-
-    if (typeof REPO_SOURCE === 'undefined') {
-        throw new Error('target repository has not been provided');
-    }
 
     const glitchRepoDir = path.join(ROOT_DIR, REPO_FOLDER);
     const deployContentDir = TARGET_FOLDER ? path.join(ROOT_DIR, TARGET_FOLDER) : ROOT_DIR;
@@ -78,7 +80,16 @@ const pushToGlitch = async () => {
 
 // script entry point
 (async () => {
-    await pushToGlitch();
+    if (typeof REPO_SOURCE === 'undefined') {
+        throw new Error('target repository has not been provided');
+    }
+
+    //await pushToGlitch();
+
+    const glitchRepo = new GlitchGit(REPO_SOURCE, true);
+
+    await glitchRepo.publishFilesToGlitch(path.join(__dirname, TARGET_FOLDER));
+
     process.exit(0);
 })().catch((err) => {
     console.error(err);
