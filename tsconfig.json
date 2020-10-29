@@ -14,7 +14,6 @@
         "resolveJsonModule": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        // we set this to false because of TypeORM entity decorators
         "strictPropertyInitialization": false,
         "removeComments": true,
         "declaration": true
