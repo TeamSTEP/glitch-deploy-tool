@@ -15,6 +15,10 @@ const pushToGlitch = async () => {
 
     const REPO_SOURCE = process.env.REPO_SOURCE;
 
+    if (typeof REPO_SOURCE === 'undefined') {
+        throw new Error('target repository has not been provided');
+    }
+
     const glitchRepoDir = path.join(ROOT_DIR, REPO_FOLDER);
     const deployContentDir = TARGET_FOLDER ? path.join(ROOT_DIR, TARGET_FOLDER) : ROOT_DIR;
 
@@ -62,12 +66,14 @@ const pushToGlitch = async () => {
     const res = await git.commit('[Auto commit] ' + Date.now());
     console.log(res);
 
-    const pushRes = await git.push('origin', 'master');
-    console.log(pushRes);
+    //const pushRes = await git.push('origin', 'master');
+    //console.log(pushRes);
 
     git = git.clearQueue();
+
     // remove the local repo
     rimraf.sync(glitchRepoDir);
+    console.log('successfully deployed to Glitch!');
 };
 
 // script entry point

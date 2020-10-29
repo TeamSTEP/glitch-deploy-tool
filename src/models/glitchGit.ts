@@ -1,18 +1,21 @@
 import simpleGit, { SimpleGit, SimpleGitOptions } from 'simple-git';
 import path from 'path';
-import queryString from 'query-string';
+import fs from 'fs-extra';
+import rimraf from 'rimraf';
+import * as Helpers from '../helpers';
 
-const DEFAULT_FOLDER = '.__temp-repo';
+const REPO_FOLDER = '.__source-repo';
+
+const ROOT_DIR = process.cwd();
 
 export default class GlitchRepo {
     private _gitUrl: string;
     private _gitInst: SimpleGit;
-    private _projectDir: string;
+
+    private _glitchRepoDir: string;
+
     public _publishFolder: string;
 
-    public get glitchRepoDir(): string {
-        return path.join(process.cwd(), this._projectDir);
-    }
     public set publishFolderDir(folder: string) {
         this._publishFolder = path.join(process.cwd(), folder);
     }
@@ -43,37 +46,38 @@ export default class GlitchRepo {
         }
     }
 
-    public async cleanRepo() {
+    public cleanGitInstance() {
         this._gitInst = this._gitInst.clearQueue();
     }
 
-    private async _cloneRepo(cloneTo?: string) {
+    private async _cloneRepo() {
+        // get the absolute directory of the repo folder
+        const repoDir = path.join(ROOT_DIR, REPO_FOLDER);
+
+        if (fs.existsSync(repoDir)) {
+            // remove the repo folder if it already exists
+            rimraf.sync(repoDir);
+        }
         // clone the glitch project repo to a folder
-        await this._gitInst.clone(this._gitUrl, DEFAULT_FOLDER);
-        const repoDir = path.join(process.cwd(), cloneTo || DEFAULT_FOLDER);
+        await this._gitInst.clone(this._gitUrl, REPO_FOLDER);
+
+        // set the location
+        this._glitchRepoDir = repoDir;
         // change the directory to access git
         this._gitInst.cwd(repoDir);
-
-        this._projectDir = repoDir;
-    }
-}
-
-class GlitchProject {
-    private _endpoint: string;
-    private _userToken: string;
-    private _projId: string;
-
-    constructor(token: string, id: string) {
-        this._endpoint = 'https://api.glitch.com';
-        this._userToken = token;
     }
 
-    public importFromGithub(repo: string, path = '/') {
-        const query = queryString.stringify({
-            authorization: this._userToken,
-            projectId: this._projId,
-            repo: repo,
-            path: path, // the default value of '/' will import everything from the root dir
-        });
+    private _replaceRepoContentWith(sourceFolder: string) {
+        if (!this._glitchRepoDir) {
+            throw new Error('Glitch project is not cloned to the local machine yet');
+        }
+        // remove everything excluding the git metadata
+        Helpers.emptyFolderContent(this._glitchRepoDir, ['.git']);
+
+        // if the source folder is an absolute directory, don't append the path
+        const folderToCopy = sourceFolder.startsWith('/') ? sourceFolder : path.join(ROOT_DIR, sourceFolder);
+
+        // move the new contents to Glitch
+        Helpers.copyFolderContent(folderToCopy, this._glitchRepoDir, ['.git']);
     }
 }
