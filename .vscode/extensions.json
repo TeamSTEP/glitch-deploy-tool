@@ -1,0 +1,29 @@
+{
+    "recommendations": [
+        "aaron-bond.better-comments",
+        "coenraads.bracket-pair-colorizer",
+        "streetsidesoftware.code-spell-checker",
+        "codestream.codestream",
+        "mikestead.dotenv",
+        "dbaeumer.vscode-eslint",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "qezhu.gitlink",
+        "yzhang.markdown-all-in-one",
+        "ms-vsliveshare.vsliveshare",
+        "davidanson.vscode-markdownlint",
+        "eg2.vscode-npm-script",
+        "christian-kohler.npm-intellisense",
+        "42crunch.vscode-openapi",
+        "christian-kohler.path-intellisense",
+        "esbenp.prettier-vscode",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "arjun.swagger-viewer",
+        "visualstudioexptteam.vscodeintellicode",
+        "redhat.vscode-yaml",
+        "github.vscode-pull-request-github",
+        "gamunu.vscode-yarn"
+    ]
+}
