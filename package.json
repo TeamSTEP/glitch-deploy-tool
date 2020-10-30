@@ -1,6 +1,6 @@
 {
     "name": "glitch-deploy-tool",
-    "version": "0.0.1-alpha",
+    "version": "0.0.2-alpha",
     "description": "CLI tool for deploying files to Glitch.com",
     "keywords": [
         "glitch.com",
@@ -38,7 +38,7 @@
         "build": "rimraf ./lib && tsc --project tsconfig.json",
         "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
         "test": "NODE_ENV=test jest --setupFiles dotenv/config --verbose --coverage && eslint '*/**/*.{js,ts,tsx}'",
-        "cli": "NODE_ENV=development ts-node -r dotenv/config src/cli/index.ts"
+        "cli": "NODE_ENV=development ts-node -r dotenv/config scripts/run.ts"
     },
     "engines": {
         "node": ">=12.x"
