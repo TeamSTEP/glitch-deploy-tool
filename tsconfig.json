@@ -8,7 +8,7 @@
         "sourceMap": true,
         "outDir": "lib",
         "strict": true,
-        "rootDir": ".",
+        "rootDir": "src",
         "resolveJsonModule": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
