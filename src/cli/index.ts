@@ -122,7 +122,6 @@ const checkToolMode = () => {
     const mode = checkToolMode();
     const parser = dashdash.createParser({ options: mode.options });
     const opts = parser.parse(process.argv);
-    console.log(opts._order);
     // print the help message if the user passes the help flag or nothing
     if (opts.help || opts._order.length === 0) {
         const help = parser.help({ includeEnv: true }).trimRight();
