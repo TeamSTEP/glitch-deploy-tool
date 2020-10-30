@@ -38,7 +38,7 @@
         "build": "rimraf ./lib && tsc --project tsconfig.json",
         "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
         "test": "NODE_ENV=test jest --setupFiles dotenv/config --verbose --coverage && eslint '*/**/*.{js,ts,tsx}'",
-        "cli": "NODE_ENV=development ts-node -r dotenv/config scripts/run.ts"
+        "cli": "NODE_ENV=development ts-node -r dotenv/config src/cli/index.ts"
     },
     "engines": {
         "node": ">=12.x"

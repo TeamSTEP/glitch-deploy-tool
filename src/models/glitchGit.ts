@@ -38,7 +38,7 @@ export default class GlitchRepo {
         let folderToCopy = '';
 
         // if no folder name or path is given, import everything in the current directory
-        if (!targetFolder || targetFolder === '*') {
+        if (!targetFolder || targetFolder === '*' || targetFolder === '.') {
             folderToCopy = ROOT_DIR;
         } else {
             // if the folder name was given, check if it's in absolute path or not

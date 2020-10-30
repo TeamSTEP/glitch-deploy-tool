@@ -1,3 +1,4 @@
+#!/usr/bin/env ts-node
 //note: this cli script is for testing and being executed directly from source
 
 import path from 'path';

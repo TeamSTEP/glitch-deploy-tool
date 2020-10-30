@@ -3,14 +3,12 @@
         "module": "commonjs",
         "esModuleInterop": true,
         "target": "es2015",
-        "lib": [
-            "es6"
-        ],
+        "lib": ["es6"],
         "moduleResolution": "node",
         "sourceMap": true,
         "outDir": "lib",
         "strict": true,
-        "rootDir": "src",
+        "rootDir": ".",
         "resolveJsonModule": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
@@ -18,18 +16,7 @@
         "removeComments": true,
         "declaration": true
     },
-    "lib": [
-        "es2015"
-    ],
-    "include": [
-        "src/**/*", "scripts"
-    ],
-    "exclude": [
-        "node_modules",
-        "build",
-        "lib",
-        "dist",
-        "tests",
-        "scripts"
-    ]
+    "lib": ["es2015"],
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "build", "lib", "dist", "tests", "scripts"]
 }
