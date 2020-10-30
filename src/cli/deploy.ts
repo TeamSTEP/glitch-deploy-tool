@@ -4,6 +4,8 @@ export const importFromFolder = async (repoUrl: string, targetPath?: string, deb
     const glitchRepo = new GlitchGit(repoUrl, debugMessage);
 
     await glitchRepo.publishFilesToGlitch(targetPath);
+
+    console.log('successfully imported projects from ' + targetPath);
 };
 
 export const importFromGithub = async (token: string, projId: string, repo: string, path?: string) => {
