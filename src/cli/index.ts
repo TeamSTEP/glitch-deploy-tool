@@ -134,7 +134,7 @@ const checkToolMode = () => {
     // print the tool version
     if (opts.version) {
         //todo: dynamically parse the version
-        console.log(`glitch-deploy-tool version 1.0.0-alpha`);
+        console.log(`glitch-deploy-tool version 0.1.1-alpha`);
         process.exit(0);
     }
 
