@@ -4,7 +4,7 @@
 
 [![NPM](https://nodei.co/npm/glitch-deploy-tool.png?downloads=true)](https://www.npmjs.com/package/glitch-deploy-tool)
 
-[![GitHub license](https://img.shields.io/github/license/hoonsubin/glitch-deploy-tool.svg)](https://github.com/hoonsubin/glitch-deploy-tool/blob/main/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/TeamSTEP/glitch-deploy-tool.svg)](https://github.com/TeamSTEP/glitch-deploy-tool/blob/main/LICENSE)
 
 > A tool that makes Glitch a bit more convenient
 
