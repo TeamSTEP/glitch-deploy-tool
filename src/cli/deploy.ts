@@ -3,9 +3,14 @@ import { GlitchGit, GlitchProject } from '../models';
 export const importFromFolder = async (repoUrl: string, targetPath?: string, debugMessage?: boolean) => {
     const glitchRepo = new GlitchGit(repoUrl, debugMessage);
 
-    await glitchRepo.publishFilesToGlitch(targetPath);
+    try {
+        await glitchRepo.publishFilesToGlitch(targetPath);
+    } catch (e) {
+        glitchRepo.cleanGitInstance();
+        throw e;
+    }
 
-    console.log('successfully imported projects from ' + targetPath);
+    console.log('successfully imported projects from ' + targetPath || process.cwd());
 };
 
 export const importFromGithub = async (token: string, projId: string, repo: string, path?: string) => {

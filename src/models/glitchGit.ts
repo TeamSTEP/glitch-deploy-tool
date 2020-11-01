@@ -59,15 +59,19 @@ export default class GlitchRepo {
         await this._pushChangesToRemote();
 
         this._writeLog('cleaning up...');
-        this._cleanGitInstance();
-        // remove the local repo
-        rimraf.sync(this._glitchRepoDir);
+        this.cleanGitInstance();
 
         this._writeLog('done');
     }
 
-    private _cleanGitInstance() {
+    public cleanGitInstance() {
+        if (!this._glitchRepoDir) {
+            throw new Error('Glitch project is not cloned to the local machine yet');
+        }
+
         this._gitInst = this._gitInst.clearQueue();
+        // remove the local repo
+        rimraf.sync(this._glitchRepoDir);
     }
 
     private async _cloneRepo() {
@@ -106,7 +110,7 @@ export default class GlitchRepo {
 
         this._writeLog(`cloning everything inside ${folderToCopy} to Glitch`);
         // move the new contents to Glitch
-        Helpers.copyFolderContent(folderToCopy, this._glitchRepoDir, ['.git']);
+        Helpers.copyFolderContent(folderToCopy, this._glitchRepoDir, ['.git', REPO_FOLDER]);
     }
 
     private async _pushChangesToRemote() {
