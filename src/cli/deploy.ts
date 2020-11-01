@@ -10,7 +10,7 @@ export const importFromFolder = async (repoUrl: string, targetPath?: string, deb
         throw e;
     }
 
-    console.log('successfully imported projects from ' + targetPath || process.cwd());
+    console.log('successfully imported projects from ' + (targetPath || process.cwd()));
 };
 
 export const importFromGithub = async (token: string, projId: string, repo: string, path?: string) => {

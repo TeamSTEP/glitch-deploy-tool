@@ -134,7 +134,7 @@ const checkToolMode = () => {
     // print the tool version
     if (opts.version) {
         //todo: dynamically parse the app version without importing package.json (due to tsc folder structure)
-        console.log(`glitch-deploy-tool version 0.1.3-alpha`);
+        console.log(`glitch-deploy-tool version 0.1.4-alpha`);
         process.exit(0);
     }
 
