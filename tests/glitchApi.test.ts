@@ -33,8 +33,8 @@ describe('Importing Github repositories to Glitch', () => {
             .post('/project/githubImport')
             .query({
                 authorization: token,
-                projectId: projectId,
-                repo: repo,
+                projectId,
+                repo,
                 path: '/', // default path
             })
             .reply(200, { status: 200 });
