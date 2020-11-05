@@ -7,6 +7,11 @@
         "typescript",
         "cli-tool"
     ],
+    "main": "lib/index.js",
+    "module": "lib/index.js",
+    "bin": {
+        "glitch-deploy-tool": "lib/cli/index.js"
+    },
     "private": false,
     "homepage": "https://github.com/TeamSTEP/glitch-deploy-tool",
     "bugs": {
@@ -27,10 +32,6 @@
         "darwin",
         "linux"
     ],
-    "module": "lib/index.js",
-    "bin": {
-        "glitch-deploy-tool": "lib/cli/index.js"
-    },
     "scripts": {
         "start": "NODE_ENV=production ts-node -r dotenv/config src/index.ts",
         "dev": "NODE_ENV=development ts-node-dev -r dotenv/config src/index.ts",
