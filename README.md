@@ -1,8 +1,10 @@
 # Glitch Deploy Tool
 
-![cover](img/cover.png)
+![cover](img/banner.jpg)
 
 [![NPM](https://nodei.co/npm/glitch-deploy-tool.png?downloads=true)](https://www.npmjs.com/package/glitch-deploy-tool)
+
+[![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dteamstep%26type%3Dpatrons&style=for-the-badge)](https://patreon.com/teamstep)
 
 [![GitHub license](https://img.shields.io/github/license/TeamSTEP/glitch-deploy-tool.svg)](https://github.com/TeamSTEP/glitch-deploy-tool/blob/main/LICENSE)
 
