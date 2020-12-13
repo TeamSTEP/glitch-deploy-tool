@@ -53,6 +53,7 @@
         "@types/dashdash": "^1.14.0",
         "@types/fs-extra": "^9.0.2",
         "@types/jest": "^26.0.15",
+        "@types/lodash": "^4.14.165",
         "@types/nock": "^11.1.0",
         "@types/node": "^14.14.2",
         "@types/node-fetch": "^2.5.7",
@@ -75,6 +76,7 @@
     "dependencies": {
         "dashdash": "^2.0.0",
         "fs-extra": "^9.0.1",
+        "lodash": "^4.17.20",
         "node": "^15.0.1",
         "node-fetch": "^2.6.1",
         "query-string": "^6.13.6",
