@@ -3,25 +3,38 @@ import path from 'path';
 import fs from 'fs-extra';
 import rimraf from 'rimraf';
 import * as Helpers from '../helpers';
+import _ from 'lodash';
+
+export interface CommitAuthor {
+    name: string;
+    email: string;
+}
 
 const REPO_FOLDER = '.__source-repo';
 
 const ROOT_DIR = process.cwd();
 
+const DEFAULT_AUTHOR: CommitAuthor = {
+    name: 'Glitch Deploy Tool',
+    email: 'glitch@users.noreply.deploy.com',
+};
 export default class GlitchRepo {
-    private _gitUrl: string;
+    private _remoteOrigin: string;
+
     private _gitInst: SimpleGit;
 
     private _glitchRepoDir: string | undefined;
 
     private _logMsg: boolean;
 
-    constructor(gitUrl: string, logMessage = false) {
-        if (!gitUrl.startsWith('https://')) {
+    private _authorInfo: CommitAuthor;
+
+    constructor(remoteOrigin: string, logMessage = false, commitAs?: CommitAuthor) {
+        if (!remoteOrigin.startsWith('https://')) {
             // add the https prefix if the user did not provide one
-            this._gitUrl = 'https://' + gitUrl;
+            this._remoteOrigin = 'https://' + remoteOrigin;
         } else {
-            this._gitUrl = gitUrl;
+            this._remoteOrigin = remoteOrigin;
         }
         const gitOptions: SimpleGitOptions = {
             baseDir: ROOT_DIR,
@@ -32,42 +45,52 @@ export default class GlitchRepo {
         this._logMsg = logMessage;
         // setup a git client
         this._gitInst = simpleGit(gitOptions);
+
+        this._authorInfo = commitAs || DEFAULT_AUTHOR;
+    }
+
+    public get git() {
+        return this._gitInst;
     }
 
     public async publishFilesToGlitch(targetFolder?: string) {
-        let folderToCopy = '';
+        try {
+            let folderToCopy = '';
 
-        // if no folder name or path is given, import everything in the current directory
-        if (!targetFolder || targetFolder === '*' || targetFolder === '.') {
-            folderToCopy = ROOT_DIR;
-        } else {
-            // if the folder name was given, check if it's in absolute path or not
-            folderToCopy = targetFolder.startsWith('/') ? targetFolder : path.join(ROOT_DIR, targetFolder);
-            if (!fs.existsSync(folderToCopy)) {
-                throw new Error(`target folder ${folderToCopy} does not exists`);
+            // if no folder name or path is given, import everything in the current directory
+            if (!targetFolder || targetFolder === '*' || targetFolder === '.') {
+                folderToCopy = ROOT_DIR;
+            } else {
+                // if the folder name was given, check if it's in absolute path or not
+                folderToCopy = targetFolder.startsWith('/') ? targetFolder : path.join(ROOT_DIR, targetFolder);
+                if (!fs.existsSync(folderToCopy)) {
+                    throw new Error(`target folder ${folderToCopy} does not exists`);
+                }
             }
+
+            await this._cloneRepo();
+
+            if (!this._glitchRepoDir) {
+                throw new Error('Glitch project is not cloned to the local machine yet');
+            }
+
+            this._replaceRepoContentWith(folderToCopy);
+
+            await this._pushChangesToRemote();
+
+            this._writeLog('successfully deployed to Glitch!');
+        } catch (e) {
+            console.error(e);
+        } finally {
+            this.cleanGitInstance();
         }
-
-        await this._cloneRepo();
-
-        if (!this._glitchRepoDir) {
-            throw new Error('Glitch project is not cloned to the local machine yet');
-        }
-
-        this._replaceRepoContentWith(folderToCopy);
-
-        await this._pushChangesToRemote();
-
-        this._writeLog('cleaning up...');
-        this.cleanGitInstance();
-
-        this._writeLog('done');
     }
 
     public cleanGitInstance() {
         if (!this._glitchRepoDir) {
             throw new Error('Glitch project is not cloned to the local machine yet');
         }
+        this._writeLog('cleaning up the local repo...');
 
         this._gitInst = this._gitInst.clearQueue();
         // remove the local repo
@@ -86,7 +109,7 @@ export default class GlitchRepo {
 
         this._writeLog('cloning repository...');
         // clone the glitch project repo to a folder
-        await this._gitInst.clone(this._gitUrl, REPO_FOLDER);
+        await this._gitInst.clone(this._remoteOrigin, REPO_FOLDER);
 
         // set the location
         this._glitchRepoDir = repoDir;
@@ -100,7 +123,7 @@ export default class GlitchRepo {
             throw new Error('Glitch project is not cloned to the local machine yet');
         }
 
-        this._writeLog('removing everything inside the Glitch repository');
+        this._writeLog('removing everything inside the cloned repository');
 
         // remove everything excluding the git metadata
         Helpers.emptyFolderContent(this._glitchRepoDir, ['.git']);
@@ -108,20 +131,46 @@ export default class GlitchRepo {
         // if the source folder is an absolute directory, don't append the path
         const folderToCopy = sourceFolder.startsWith('/') ? sourceFolder : path.join(ROOT_DIR, sourceFolder);
 
-        this._writeLog(`cloning everything inside ${folderToCopy} to Glitch`);
+        this._writeLog(`copying everything inside ${folderToCopy} to the local repo`);
         // move the new contents to Glitch
         Helpers.copyFolderContent(folderToCopy, this._glitchRepoDir, ['.git', REPO_FOLDER]);
     }
 
+    private async _getCurrentAuthor() {
+        const gitConfigList = await this._gitInst.listConfig();
+        const config = {
+            name: gitConfigList.all['user.name'],
+            email: gitConfigList.all['user.email'],
+        };
+
+        // obtain the first entry of the user info if there are multiple values
+        const user: CommitAuthor = {
+            name: Array.isArray(config.name) ? config.name[0] : config.name,
+            email: Array.isArray(config.email) ? config.email[0] : config.email,
+        };
+        return user.email.startsWith('none') || user.name.startsWith('none') ? null : user;
+    }
+
     private async _pushChangesToRemote() {
-        this._writeLog('committing all changes to Glitch...');
         // add everything in the working directory
-        await this._gitInst.add('*');
+        await this._gitInst.add('./*');
 
-        // commit all changes to git
-        await this._gitInst.commit('[Auto commit] ' + Date.now());
+        const localAuth = await this._getCurrentAuthor();
 
-        this._writeLog('pushing folder to Glitch...');
+        // use the local author information if there is a local author and the user did not provide any author info during instantiation
+        const useLocalAuthor = localAuth && _.isEqual(this._authorInfo, DEFAULT_AUTHOR);
+
+        // we can do a non-null assertion because the above state must be true for it to pass
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const { name, email } = useLocalAuthor ? localAuth! : this._authorInfo;
+
+        // commit all changes added above to git and author it with the provided information
+        const commitRes = await this._gitInst.commit(`[Auto commit] ${Date.now()}`, undefined, {
+            '--author': `"${name} <${email}>"`,
+        });
+
+        this._writeLog('committing the following changes to Glitch...');
+        this._writeLog(commitRes.summary);
 
         // pull before pushing
         await this._gitInst.pull('origin', 'master');
@@ -134,6 +183,13 @@ export default class GlitchRepo {
      * @param message message to write
      */
     private _writeLog<T>(message?: T) {
-        if (this._logMsg) console.log(message);
+        if (this._logMsg) {
+            // set the simple-git debug output variable. Refer to this for the details: <https://github.com/steveukx/git-js#enable-logging>
+            if (process.env.DEBUG !== 'simple-git:task:*') {
+                process.env.DEBUG = 'simple-git:task:*';
+            }
+            // output custom logs
+            console.debug(message);
+        }
     }
 }

@@ -2,49 +2,45 @@
 //note: this cli script is for testing and being executed directly from source
 
 import path from 'path';
-import { GlitchGit, GlitchProject } from '../src/models';
+import { GlitchGit } from '../src/models';
 
-const gitPushTest = async () => {
+const gitConfigTest = async () => {
     const source = process.env.REPO_SOURCE;
 
     if (typeof source === 'undefined') {
         throw new Error('target repository has not been provided');
     }
 
-    // the folder to where it will copy things
-    const targetFolder = 'target';
+    // the folder that contains the deploy files
+    const targetFolder = 'dist';
 
-    const glitchRepo = new GlitchGit(source, true);
+    const glitchRepo = new GlitchGit(source, true, { name: 'Hello World', email: 'info@deploy.me' });
 
-    await glitchRepo.publishFilesToGlitch(path.join(__dirname, targetFolder));
-};
+    const gitConfigList = await glitchRepo.git.listConfig();
+    const config = {
+        name: gitConfigList.all['user.name'],
+        email: gitConfigList.all['user.email'],
+    };
 
-const gitImportTest = async () => {
-    const projId = process.env.GLITCH_PROJ_ID;
-    const token = process.env.GLITCH_USER_TOKEN;
+    // obtain the first entry of the user info if there are multiple values
+    const user = {
+        name: Array.isArray(config.name) ? config.name[0] : config.name,
+        email: Array.isArray(config.email) ? config.email[0] : config.email,
+    };
 
-    if (typeof projId === 'undefined' || typeof token === 'undefined') {
-        throw new Error('the required environment variables were not provided');
-    }
+    const author = user.email.startsWith('none') || user.name.startsWith('none') ? null : user;
 
-    const sourceRepo = 'staketechnologies/lockdrop-ui';
-    const glitchProj = new GlitchProject(token, projId);
+    console.log(author);
 
-    const res = await glitchProj.importFromGithub(sourceRepo, 'public');
-
-    if (res.status !== 200) {
-        throw new Error('Failed to import project');
-    }
-    console.log('successfully imported project ' + sourceRepo);
+    await glitchRepo.publishFilesToGlitch(targetFolder);
 };
 
 // script entry point
 (async () => {
     throw new Error('Script not implemented!');
-    //await gitPushTest();
-    //await gitImportTest();
+    //await gitConfigTest();
 
-    //process.exit(0);
+    process.exit(0);
 })().catch((err) => {
     console.error(err);
     process.exit(1);
