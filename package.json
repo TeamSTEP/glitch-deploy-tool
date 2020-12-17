@@ -1,6 +1,6 @@
 {
     "name": "glitch-deploy-tool",
-    "version": "0.1.5-alpha",
+    "version": "0.1.6-alpha",
     "description": "CLI tool for deploying files to Glitch.com",
     "keywords": [
         "glitch.com",
