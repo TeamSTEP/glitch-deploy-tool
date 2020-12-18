@@ -25,8 +25,8 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: 12.x
-            - name: build
+            - name: Build
               run: |
-                  yarn
-                  yarn build
+                yarn
+                yarn build
               working-directory: ./
