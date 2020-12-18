@@ -155,10 +155,7 @@ export default class GlitchRepo {
         else return user.email.startsWith('none') || user.name.startsWith('none') ? null : user;
     }
 
-    private async _pushChangesToRemote() {
-        // add everything in the working directory
-        await this._gitInst.add('./*');
-
+    private async _currentCommitAuthor() {
         const localAuth = await this._parseSystemAuthor();
 
         // use the local author information if there is a local author and the user did not provide any author info during instantiation
@@ -166,11 +163,26 @@ export default class GlitchRepo {
 
         // we can do a non-null assertion because the above state must be true for it to pass
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const { name, email } = useLocalAuthor ? localAuth! : this._authorInfo;
+        const currentAuthor = useLocalAuthor ? localAuth! : this._authorInfo;
+
+        if (!localAuth) {
+            // if there are no local config set the local git identity so that the commit command won't show an error
+            await this._gitInst.addConfig('user.name', currentAuthor.name, true);
+            await this._gitInst.addConfig('user.email', currentAuthor.email, true);
+        }
+
+        return currentAuthor;
+    }
+
+    private async _pushChangesToRemote() {
+        // add everything in the working directory
+        await this._gitInst.add('./*');
+
+        const commitAs = await this._currentCommitAuthor();
 
         // commit all changes added above to git and author it with the provided information
         const commitRes = await this._gitInst.commit(`[Auto commit] ${Date.now()}`, undefined, {
-            '--author': `"${name} <${email}>"`,
+            '--author': `"${commitAs.name} <${commitAs.email}>"`,
         });
 
         this._writeLog('committing the following changes to Glitch...');
