@@ -30,6 +30,8 @@ export default class GlitchRepo {
     private _authorInfo: CommitAuthor;
 
     constructor(remoteOrigin: string, logMessage = false, commitAs?: CommitAuthor) {
+        if (!remoteOrigin || typeof remoteOrigin !== 'string') throw new Error('Please provide a remote origin');
+
         if (!remoteOrigin.startsWith('https://')) {
             // add the https prefix if the user did not provide one
             this._remoteOrigin = 'https://' + remoteOrigin;
