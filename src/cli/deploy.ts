@@ -3,12 +3,7 @@ import { GlitchGit, GlitchProject } from '../models';
 export const importFromFolder = async (repoUrl: string, targetPath?: string, debugMessage?: boolean) => {
     const glitchRepo = new GlitchGit(repoUrl, debugMessage);
 
-    try {
-        await glitchRepo.publishFilesToGlitch(targetPath);
-    } catch (e) {
-        glitchRepo.cleanGitInstance();
-        throw e;
-    }
+    await glitchRepo.publishFilesToGlitch(targetPath);
 
     console.log('successfully imported projects from ' + (targetPath || process.cwd()));
 };

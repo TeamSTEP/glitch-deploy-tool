@@ -91,7 +91,7 @@ Installing this as part of your project's dependency will allow you to directly 
 
 The base command for the CLI is `glitch-deploy-tool` with two sub-commands: `from-local` and `github`.
 
-You can also pass some of the parameters from an environmental variable.
+This tool can read parameters as an environmental variable.
 
 ```
 usage: glitch-deploy-tool from-local [OPTIONS]

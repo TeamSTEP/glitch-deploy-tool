@@ -12,8 +12,6 @@ export interface CommitAuthor {
 
 const REPO_FOLDER = '.__source-repo';
 
-const ROOT_DIR = process.cwd();
-
 const DEFAULT_AUTHOR: CommitAuthor = {
     name: 'Glitch Deploy Tool',
     email: 'glitch@users.noreply.deploy.com',
@@ -30,8 +28,6 @@ export default class GlitchRepo {
     private _authorInfo: CommitAuthor;
 
     constructor(remoteOrigin: string, logMessage = false, commitAs?: CommitAuthor) {
-        if (!remoteOrigin || typeof remoteOrigin !== 'string') throw new Error('Please provide a remote origin');
-
         if (!remoteOrigin.startsWith('https://')) {
             // add the https prefix if the user did not provide one
             this._remoteOrigin = 'https://' + remoteOrigin;
@@ -39,7 +35,7 @@ export default class GlitchRepo {
             this._remoteOrigin = remoteOrigin;
         }
         const gitOptions: SimpleGitOptions = {
-            baseDir: ROOT_DIR,
+            baseDir: this.rootDir,
             binary: 'git',
             maxConcurrentProcesses: 2,
         };
@@ -49,6 +45,10 @@ export default class GlitchRepo {
         this._gitInst = simpleGit(gitOptions);
 
         this._authorInfo = commitAs || DEFAULT_AUTHOR;
+    }
+
+    public get rootDir() {
+        return process.cwd();
     }
 
     public get git() {
@@ -61,10 +61,10 @@ export default class GlitchRepo {
 
             // if no folder name or path is given, import everything in the current directory
             if (!targetFolder || targetFolder === '*' || targetFolder === '.') {
-                folderToCopy = ROOT_DIR;
+                folderToCopy = this.rootDir;
             } else {
                 // if the folder name was given, check if it's in absolute path or not
-                folderToCopy = targetFolder.startsWith('/') ? targetFolder : path.join(ROOT_DIR, targetFolder);
+                folderToCopy = targetFolder.startsWith('/') ? targetFolder : path.join(this.rootDir, targetFolder);
                 if (!fs.existsSync(folderToCopy)) {
                     throw new Error(`target folder ${folderToCopy} does not exists`);
                 }
@@ -81,9 +81,8 @@ export default class GlitchRepo {
             await this._pushChangesToRemote();
 
             this._writeLog('successfully deployed to Glitch!');
-        } catch (e) {
-            console.error(e);
         } finally {
+            // clean the left over files before exiting
             this.cleanGitInstance();
         }
     }
@@ -101,7 +100,7 @@ export default class GlitchRepo {
 
     private async _cloneRepo() {
         // get the absolute directory of the repo folder
-        const repoDir = path.join(ROOT_DIR, REPO_FOLDER);
+        const repoDir = path.join(this.rootDir, REPO_FOLDER);
 
         if (fs.existsSync(repoDir)) {
             this._writeLog('found an existing repository, removing it before cloning a new one');
@@ -131,14 +130,14 @@ export default class GlitchRepo {
         Helpers.emptyFolderContent(this._glitchRepoDir, ['.git']);
 
         // if the source folder is an absolute directory, don't append the path
-        const folderToCopy = sourceFolder.startsWith('/') ? sourceFolder : path.join(ROOT_DIR, sourceFolder);
+        const folderToCopy = sourceFolder.startsWith('/') ? sourceFolder : path.join(this.rootDir, sourceFolder);
 
         this._writeLog(`copying everything inside ${folderToCopy} to the local repo`);
         // move the new contents to Glitch
         Helpers.copyFolderContent(folderToCopy, this._glitchRepoDir, ['.git', REPO_FOLDER]);
     }
 
-    private async _getCurrentAuthor() {
+    private async _parseSystemAuthor() {
         const gitConfigList = await this._gitInst.listConfig();
         const config = {
             name: gitConfigList.all['user.name'],
@@ -150,17 +149,20 @@ export default class GlitchRepo {
             name: Array.isArray(config.name) ? config.name[0] : config.name,
             email: Array.isArray(config.email) ? config.email[0] : config.email,
         };
-        return user.email.startsWith('none') || user.name.startsWith('none') ? null : user;
+
+        // if the author information does not exists, return null
+        if (!user.email || !user.name) return null;
+        else return user.email.startsWith('none') || user.name.startsWith('none') ? null : user;
     }
 
     private async _pushChangesToRemote() {
         // add everything in the working directory
         await this._gitInst.add('./*');
 
-        const localAuth = await this._getCurrentAuthor();
+        const localAuth = await this._parseSystemAuthor();
 
         // use the local author information if there is a local author and the user did not provide any author info during instantiation
-        const useLocalAuthor = localAuth && _.isEqual(this._authorInfo, DEFAULT_AUTHOR);
+        const useLocalAuthor = !!(localAuth && _.isEqual(this._authorInfo, DEFAULT_AUTHOR));
 
         // we can do a non-null assertion because the above state must be true for it to pass
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
