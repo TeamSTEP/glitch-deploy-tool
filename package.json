@@ -42,7 +42,7 @@
         "cli": "NODE_ENV=development ts-node -r dotenv/config scripts/run.ts"
     },
     "engines": {
-        "node": ">=12.x"
+        "node": ">=16.x"
     },
     "funding": {
         "type": "patreon",
