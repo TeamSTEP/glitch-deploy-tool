@@ -80,6 +80,6 @@
         "node-fetch": "^2.6.1",
         "query-string": "^6.13.6",
         "rimraf": "^3.0.2",
-        "simple-git": "^2.21.0"
+        "simple-git": "^3.16.0"
     }
 }
